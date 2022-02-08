@@ -6,9 +6,9 @@ from typing import List, Union
 
 
 def plot_graphs(
-    *lists, title: str, legend: bool = False, labels: List[str] = None, show: bool = False, save: str = None
+    *lists, title: str, legend: bool = False, labels: List[str] = None, show: bool = True, save: str = None
 ):
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     for i, l in enumerate(lists):
         ax.plot(np.arange(len(l)), l, ".-", label=f"{i + 1}" if labels is None else labels[i])
     ax.set_xlabel(r"$timestep$")

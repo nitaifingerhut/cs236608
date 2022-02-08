@@ -1,11 +1,14 @@
+import numpy as np
+
 from reclab.environments.environment import Environment
+from reclab.environments.topics import Topics
 from reclab.recommenders.recommender import Recommender
 from tqdm import tqdm
 from typing import Callable, Dict, List
 from utils.misc import stdout_redirector
 
 
-def simulation_run(
+def run_simulation(
     env: Environment,
     recommender: Recommender,
     steps: int,
@@ -15,6 +18,7 @@ def simulation_run(
     callbacks_kwargs: Dict = dict(),
     reset: bool = True,
     seed: int = 42,
+    label: str = None
 ):
     if reset:
         env.seed(seed)
@@ -40,7 +44,7 @@ def simulation_run(
     if len(callbacks) != 0:
         results = [[] for _ in callbacks]
 
-    for i in tqdm(range(steps)):
+    for _ in tqdm(range(steps), desc=label):
         for j, callback in enumerate(callbacks):
             res = callback(env, recommender, **callbacks_kwargs)
             results[j].append(res)
@@ -54,3 +58,50 @@ def simulation_run(
             with stdout_redirector():
                 recommender._model.train(recommender._train_data)  # Specificaly for libfm.
     return results
+
+
+def run_experiment(
+    env_params: Dict,
+    recommender: Recommender,
+    steps: int,
+    repeats: int,
+    rpu: int = 1,
+    retrain: bool = True,
+    callbacks: List[Callable] = [],
+    callbacks_kwargs: Dict = dict(),
+    reset: bool = True,
+    **kwargs,
+):
+    callbacks_names = [c.__name__ for c in callbacks]
+    callbacks_names = [c[:-5] for c in callbacks_names if c.endswith("_func")]
+
+    if len(kwargs) != 0:
+        k = list(kwargs.keys())[0]
+        v = list(kwargs.values())[0]
+
+    callbacks_res = {n: {vv: [] for vv in v} for n in callbacks_names}
+
+    if len(kwargs) != 0:
+        for vv in v:
+            env_params[k] = vv
+            env = Topics(**env_params)
+            for r in range(repeats):
+                _res = run_simulation(
+                    env=env,
+                    recommender=recommender,
+                    steps=steps,
+                    rpu=rpu,
+                    retrain=retrain,
+                    callbacks=callbacks,
+                    callbacks_kwargs=callbacks_kwargs,
+                    reset=reset,
+                    seed=r,
+                    label=f"{k}={vv}, repeat={str(r).zfill(2)}"
+                )
+                for i, n in enumerate(callbacks_names):
+                    callbacks_res[n][vv].append(_res[i])
+
+            for i, n in enumerate(callbacks_names):
+                callbacks_res[n][vv] = list(np.mean(np.asarray(callbacks_res[n][vv]), axis=0))
+
+    return callbacks_res
