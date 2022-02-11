@@ -89,7 +89,7 @@ if __name__ == "__main__":
         callbacks=callbacks,
         callbacks_kwargs=callbacks_kwargs,
         reset=True,
-        topic_change=topic_changes
+        topic_change=topic_changes,
     )
     for k, v in res.items():
-      plot_graphs(*list(v.values()), title=k, legend=True, labels=[f"topic_change={x}" for x in topic_changes])
+        plot_graphs(*list(v.values()), title=k, legend=True, labels=[f"topic_change={x}" for x in topic_changes])

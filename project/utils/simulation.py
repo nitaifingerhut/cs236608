@@ -18,7 +18,7 @@ def run_simulation(
     callbacks_kwargs: Dict = dict(),
     reset: bool = True,
     seed: int = 42,
-    label: str = None
+    label: str = None,
 ):
     if reset:
         env.seed(seed)
@@ -96,7 +96,7 @@ def run_experiment(
                     callbacks_kwargs=callbacks_kwargs,
                     reset=reset,
                     seed=r,
-                    label=f"{k}={vv}, repeat={str(r).zfill(2)}"
+                    label=f"{k}={vv}, repeat={str(r).zfill(2)}",
                 )
                 for i, n in enumerate(callbacks_names):
                     callbacks_res[n][vv].append(_res[i])
