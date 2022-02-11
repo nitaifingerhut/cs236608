@@ -3,6 +3,7 @@ import numpy as np
 from reclab.environments.environment import Environment
 from reclab.environments.topics import Topics
 from reclab.recommenders.recommender import Recommender
+from reclab.recommenders.libfm import LibFM_MLHB
 from tqdm import tqdm
 from typing import Callable, Dict, List
 from utils.misc import stdout_redirector
@@ -54,7 +55,7 @@ def run_simulation(
         _, _, ratings, _ = env.step(recommendations)
         recommender.update(ratings=ratings)
 
-        if retrain and hasattr(recommender, "_model"):
+        if retrain and hasattr(recommender, "_model") and isinstance(recommender, LibFM_MLHB):
             with stdout_redirector():
                 recommender._model.train(recommender._train_data)  # Specificaly for libfm.
     return results

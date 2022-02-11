@@ -33,6 +33,7 @@ if __name__ == "__main__":
         "rating_frequency": opts.rating_freq,
         "num_init_ratings": opts.num_users * opts.num_items // 5,
         "noise": 0.0,
+        "user_model": "rebelling",
     }
     env = Topics(**env_params)
     env.seed(opts.seed)
@@ -48,6 +49,8 @@ if __name__ == "__main__":
     Autorec_params = {
         "num_users": opts.num_users,
         "num_items": opts.num_items,
+        "hidden_neuron": 500,
+        "train_epoch": 100,
         "random_seed": opts.seed,
     }
     recommender = RECOMMENDERS[opts.recommender](**Autorec_params)
@@ -55,34 +58,34 @@ if __name__ == "__main__":
     callbacks_kwargs = dict(user_id=0)
     callbacks = [RMSE_func, ARRI_func, user_preferences]
 
-    env = Topics(**env_params, topic_change=1)
-    RMSEs, ARRIs, PREFERENCES = run_simulation(
-        env=env,
-        recommender=recommender,
-        steps=opts.steps,
-        rpu=1,
-        retrain=True,
-        callbacks=callbacks,
-        callbacks_kwargs=callbacks_kwargs,
-        reset=True,
-        seed=opts.seed,
-    )
-    plot_graphs(RMSEs, title="rmse")
-    plot_graphs(ARRIs, title="arri")
+    # env = Topics(**env_params, topic_change=1)
+    # RMSEs, ARRIs, PREFERENCES = run_simulation(
+    #     env=env,
+    #     recommender=recommender,
+    #     steps=opts.steps,
+    #     rpu=1,
+    #     retrain=True,
+    #     callbacks=callbacks,
+    #     callbacks_kwargs=callbacks_kwargs,
+    #     reset=True,
+    #     seed=opts.seed,
+    # )
+    # plot_graphs(RMSEs, title="rmse")
+    # plot_graphs(ARRIs, title="arri")
+    #
+    # vid_writer = imageio.get_writer("preferences.mp4", fps=5)
+    # PREFERENCES = np.stack(PREFERENCES, axis=0)
+    # bins = np.linspace(math.floor(np.min(PREFERENCES)), math.ceil(np.max(PREFERENCES)) + 1, num=10)
+    # for x in PREFERENCES:
+    #     _, ax = plt.subplots()
+    #     ax.hist(x, bins=bins)
+    #     data = plt_to_numpy(ax)
+    #     plt.close()
+    #     vid_writer.append_data(data)
+    # vid_writer.close()
 
-    vid_writer = imageio.get_writer("preferences.mp4", fps=5)
-    PREFERENCES = np.stack(PREFERENCES, axis=0)
-    bins = np.linspace(math.floor(np.min(PREFERENCES)), math.ceil(np.max(PREFERENCES)) + 1, num=10)
-    for x in PREFERENCES:
-        _, ax = plt.subplots()
-        ax.hist(x, bins=bins)
-        data = plt_to_numpy(ax)
-        plt.close()
-        vid_writer.append_data(data)
-    vid_writer.close()
-
-    repeats = 5
-    topic_changes = [0, 1, 2]
+    repeats = 1
+    topic_changes = [1]
     res = run_experiment(
         env_params=env_params,
         recommender=recommender,
