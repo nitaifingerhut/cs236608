@@ -5,7 +5,7 @@ import math
 import numpy as np
 
 from reclab.environments.topics import Topics
-from reclab.recommenders.libfm import LibFM_MLHB
+from reclab.recommenders import RECOMMENDERS
 from utils.callbacks import ARRI_func, RMSE_func, user_preferences
 from utils.plots import plot_graphs, plt_to_numpy
 from utils.simulation import run_simulation, run_experiment
@@ -15,6 +15,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--steps", type=int, default=100)
+    parser.add_argument("--recommender", type=str, default="autorec", choices=RECOMMENDERS.keys())
     parser.add_argument("--num-users", type=int, default=100)
     parser.add_argument("--num-items", type=int, default=100)
     parser.add_argument("--num-topics", type=int, default=10)
@@ -36,15 +37,20 @@ if __name__ == "__main__":
     env = Topics(**env_params)
     env.seed(opts.seed)
 
-    LibFM_params = {
-        "num_user_features": 0,
-        "num_item_features": 0,
-        "num_rating_features": 0,
-        "max_num_users": opts.num_users,
-        "max_num_items": opts.num_items,
-        "seed": opts.seed,
+    # LibFM_params = {
+    #     "num_user_features": 0,
+    #     "num_item_features": 0,
+    #     "num_rating_features": 0,
+    #     "max_num_users": opts.num_users,
+    #     "max_num_items": opts.num_items,
+    #     "seed": opts.seed,
+    # }
+    Autorec_params = {
+        "num_users": opts.num_users,
+        "num_items": opts.num_items,
+        "random_seed": opts.seed,
     }
-    recommender = LibFM_MLHB(**LibFM_params)
+    recommender = RECOMMENDERS[opts.recommender](**Autorec_params)
 
     callbacks_kwargs = dict(user_id=0)
     callbacks = [RMSE_func, ARRI_func, user_preferences]
