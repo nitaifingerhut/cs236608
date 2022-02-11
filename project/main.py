@@ -70,9 +70,7 @@ if __name__ == "__main__":
     plot_graphs(RMSEs, title="rmse")
     plot_graphs(ARRIs, title="arri")
 
-    vid_writer = imageio.get_writer(
-        "preferences.mov", fps=5, macro_block_size=1, codec="prores_ks", pixelformat="yuv444p10le",
-    )
+    vid_writer = imageio.get_writer("preferences.mp4", fps=5)
     PREFERENCES = np.stack(PREFERENCES, axis=0)
     bins = np.linspace(math.floor(np.min(PREFERENCES)), math.ceil(np.max(PREFERENCES)) + 1, num=10)
     for x in PREFERENCES:
