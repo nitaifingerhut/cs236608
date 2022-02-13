@@ -424,3 +424,83 @@ class PredictRecommender(Recommender):
 
         """
         raise NotImplementedError
+
+
+class ForeverPredictRecommender(PredictRecommender):
+    def __init__(self, mode: str = "ignore", exclude=None, **strategy_dict):
+        super().__init__(exclude=exclude, **strategy_dict)
+
+        if mode not in ("baseline", "ignore", "reset"):
+            raise ValueError(f"Invalid mode (={mode})")
+        self.mode = mode
+
+    def recommend(self, user_contexts, num_recommendations):
+        """Recommend items to users.
+
+        Parameters
+        ----------
+        user_contexts : ordered dict
+            The setting each user is going to be recommended items in. The key is the user id and
+            the value is the rating features.
+        num_recommendations : int
+            The number of items to recommend to each user.
+
+        Returns
+        -------
+        recs : list of list
+            The recommendations made to each user. recs[i] is the list of item ids recommended
+            to the i-th user.
+        predicted_ratings : list of list
+            The predicted ratings of the recommended items. recs[i] is the list of predicted
+            ratings for the items recommended to the i-th user.
+
+        """
+        # Format the arrays to be passed to the prediction function. We need to predict all
+        # items that have not been rated for each user.
+        ratings_to_predict = []
+        all_item_ids = []
+        # TODO: We need to figure out what to do when the number of items left to recommend
+        # runs out.
+        for user_id in user_contexts:
+            inner_uid = self._outer_to_inner_uid[user_id]
+
+            item_ids = np.arange(len(self._items))
+
+            if self.mode in ("baseline", "reset"):
+                item_ids = self._ratings[inner_uid].nonzero()[1]
+                item_ids = np.setdiff1d(np.arange(len(self._items)), item_ids)
+
+            if self.mode == "reset" and len(item_ids) == 0:
+                num_to_reset = np.random.randint(1, len(self._items))
+                indices_to_reset = np.random.choice(np.arange(len(self._items)), (num_to_reset,))
+                self._ratings[inner_uid, indices_to_reset] = 0
+
+            item_ids = np.setdiff1d(item_ids, self._exclude_dict[inner_uid])
+            user_ids = inner_uid * np.ones(len(item_ids), dtype=np.int)
+            contexts = len(item_ids) * [user_contexts[user_id]]
+            ratings_to_predict += list(zip(user_ids, item_ids, contexts))
+            all_item_ids.append(item_ids)
+
+        # Predict the ratings and convert predictions into a list of arrays indexed by user.
+        if self._dense_predictions is None:
+            all_predictions = self._predict(ratings_to_predict)
+        else:
+            all_predictions = []
+            for user_id, item_id, _ in ratings_to_predict:
+                all_predictions.append(self._dense_predictions[user_id, item_id])
+
+        item_lens = map(len, all_item_ids)
+        all_predictions = np.split(all_predictions, list(itertools.accumulate(item_lens)))
+
+        # Pick items according to the strategy, along with their predicted ratings.
+        all_recs = []
+        all_predicted_ratings = []
+        for item_ids, predictions in zip(all_item_ids, all_predictions):
+            perm = np.random.permutation(len(item_ids))
+            item_ids = item_ids[perm]
+            predictions = predictions[perm]
+            recs, predicted_ratings = self._select_item(item_ids, predictions, num_recommendations)
+            # Convert the recommendations to outer item ids.
+            all_recs.append([self._inner_to_outer_iid[rec] for rec in recs])
+            all_predicted_ratings.append(predicted_ratings)
+        return np.array(all_recs), np.array(all_predicted_ratings)
