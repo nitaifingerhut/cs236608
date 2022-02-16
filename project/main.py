@@ -30,6 +30,7 @@ def parse_args() -> argparse.Namespace:
     # parser.add_argument("--env-topic-change", nargs='+', type=float)  # For some weird bug in nargs='+' only in VsCode... (manorz, 02/12/22)
     parser.add_argument("--env-topic-change", type=str, default='0,1,2')
     parser.add_argument("--rec-eps-greedy", type=float)
+    parser.add_argument("--recommender_mode", type=str, default='baseline')
     return parser.parse_args()
 
 
@@ -68,6 +69,7 @@ if __name__ == "__main__":
         "hidden_neuron": 500,
         "train_epoch": 100,
         "random_seed": opts.seed,
+        "recommender_mode": opts.recommender_mode
     }
 
     recommender = RECOMMENDERS[opts.recommender](**Autorec_params)

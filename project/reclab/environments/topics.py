@@ -101,7 +101,7 @@ class Topics(environment.DictEnvironment):
         shift_weight=0.0,
         user_bias_type="none",
         item_bias_type="none",
-        user_model: str = "baseline"
+        user_model: str = "dynamic",
     ):
         """Create a Topics environment."""
         super().__init__(
@@ -133,7 +133,7 @@ class Topics(environment.DictEnvironment):
         self._user_bias_type = user_bias_type
         self._item_bias_type = item_bias_type
 
-        if user_model not in ("dynamic", "dynamic-reverse"):
+        if user_model not in ("dynamic", "dynamic-reverse", "incoherent", "confused"):
             raise ValueError(f"Invalid user_model (={user_model})")
         self._user_model = user_model
 
@@ -208,6 +208,21 @@ class Topics(environment.DictEnvironment):
                 self._user_preferences[user_id, topic] -= self._topic_change
                 not_topic = np.arange(self._num_topics) != topic
                 self._user_preferences[user_id, not_topic] += self._topic_change / (self._num_topics - 1)
+
+        if self._user_model == "incoherent":
+            if not 0 <= preference <= 5:
+                sign = np.random.choice([-1.0, 1.0])
+                self._user_preferences[user_id, topic] += sign * self._topic_change
+                not_topic = np.arange(self._num_topics) != topic
+                self._user_preferences[user_id, not_topic] -= sign * self._topic_change / (self._num_topics - 1)
+
+        if self._user_model == "confused":
+            if not 0 <= preference <= 5:
+                topic_change_min_1 = max(self._topic_change, 1)  # to avoid bad sampling when 'self._topic_change=0'
+                topic_change = np.random.randint(-topic_change_min_1, topic_change_min_1, size=(1,))
+                self._user_preferences[user_id, topic] += topic_change
+                not_topic = np.arange(self._num_topics) != topic
+                self._user_preferences[user_id, not_topic] -= topic_change / (self._num_topics - 1)
 
         return rating
 

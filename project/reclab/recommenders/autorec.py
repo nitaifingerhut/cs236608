@@ -7,7 +7,7 @@ import torch
 from . import recommender
 
 
-class _AutoRecLib(torch.nn.Module):
+class AutoRecLib(torch.nn.Module):
     def __init__(self, num_users, num_items, seen_users, seen_items, hidden_neuron, dropout=0.05, random_seed=0):
         super().__init__()
         self.num_users = num_users
@@ -55,7 +55,7 @@ class _AutoRecLib(torch.nn.Module):
         return Estimated_R.T[idx].cpu().detach().numpy()
 
 
-class Autorec(recommender.PredictRecommender):
+class Autorec(recommender.ForeverPredictRecommender):
     """The Autorec recommender.
 
     Parameters
@@ -101,16 +101,17 @@ class Autorec(recommender.PredictRecommender):
         lr_decay=1e-2,
         dropout=0.05,
         random_seed=0,
+        recommender_mode: str = "ignore",
     ):
         """Create new Autorec recommender."""
-        super().__init__()
+        super().__init__(mode=recommender_mode)
 
         # We only want the function arguments so remove class related objects.
         self._hyperparameters.update(locals())
         del self._hyperparameters["self"]
         del self._hyperparameters["__class__"]
 
-        self.model = _AutoRecLib(
+        self.model = AutoRecLib(
             num_users,
             num_items,
             seen_users=set(),
@@ -162,7 +163,7 @@ class Autorec(recommender.PredictRecommender):
                 batch_set_idx = random_perm_doc_idx[i * self.batch_size : (i + 1) * self.batch_size]
 
             batch = data[batch_set_idx, :].to(self.device)
-            output = self.model.forward(batch)
+            output = self.model(batch)
             mask = self.mask_ratings[batch_set_idx, :].to(self.device)
             loss = self.model.loss(output, batch, mask, lambda_value=self.lambda_value)
 
