@@ -101,7 +101,7 @@ class Topics(environment.DictEnvironment):
         shift_weight=0.0,
         user_bias_type="none",
         item_bias_type="none",
-        user_model: str = "baseline",
+        user_model: str = "dynamic",
     ):
         """Create a Topics environment."""
         super().__init__(
@@ -133,7 +133,7 @@ class Topics(environment.DictEnvironment):
         self._user_bias_type = user_bias_type
         self._item_bias_type = item_bias_type
 
-        if user_model not in ("baseline", "rebelling", "incoherent", "confused"):
+        if user_model not in ("dynamic", "dynamic-reverse", "incoherent", "confused"):
             raise ValueError(f"Invalid user_model (={user_model})")
         self._user_model = user_model
 
@@ -197,13 +197,13 @@ class Topics(environment.DictEnvironment):
         # Update underlying preference.
         preference = self._user_preferences[user_id, topic]
 
-        if self._user_model == "baseline":
+        if self._user_model == "dynamic":
             if preference <= 5:
                 self._user_preferences[user_id, topic] += self._topic_change
                 not_topic = np.arange(self._num_topics) != topic
                 self._user_preferences[user_id, not_topic] -= self._topic_change / (self._num_topics - 1)
 
-        if self._user_model == "rebelling":
+        if self._user_model == "dynamic-reverse":
             if preference >= 0:
                 self._user_preferences[user_id, topic] -= self._topic_change
                 not_topic = np.arange(self._num_topics) != topic

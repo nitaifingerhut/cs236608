@@ -25,7 +25,7 @@ def run_simulation(
         env.seed(seed)
         if hasattr(env, "_topic_change"):
             temp = env._topic_change  # Specificaly for topics.
-            env._topic_change = 0
+            env._topic_change = 0  # TODO: I dont think this assignment and re-assignment is needed... (manorz, Feb 14) 
             # items, users, ratings = env.reset()  # Wrong order of return values (manorz, Jan 01)
             users, items, ratings = env.reset()
             env._topic_change = temp

@@ -191,7 +191,7 @@ class PredictRecommender(Recommender):
         self._inner_to_outer_uid = []
         self._outer_to_inner_iid = {}
         self._inner_to_outer_iid = []
-        self._dense_predictions = None
+        self._dense_predictions = None  # TODO: check if necessary since PredictRecommender calls this in his update method few lines below. (manorz, 02/16/22)
         self.update(users, items, ratings)
 
     def update(self, users=None, items=None, ratings=None):
