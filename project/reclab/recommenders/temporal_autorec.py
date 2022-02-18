@@ -24,23 +24,23 @@ class TemporalAutoRecLib(AutoRecLib):
 
     def loss(self, pred, test, mask, lambda_value=1):
         autorec_loss = super().loss(pred, test, mask, lambda_value)
-        # reg_value_time_enc = torch.mul(lambda_value / 2, list(self.W.parameters())[0].norm(p="fro") ** 2)
-        reg_value_time_enc = torch.mul(lambda_value / 2, self.W.norm(p="fro") ** 2)
+        reg_value_time_enc = torch.mul(lambda_value / 2, list(self.W.parameters())[0].norm(p="fro") ** 2)
+        # reg_value_time_enc = torch.mul(lambda_value / 2, self.W.norm(p="fro") ** 2)
         total_loss = autorec_loss + reg_value_time_enc
         return total_loss
 
     def prepare_model(self):
-        self.W = 0.9 ** torch.linspace(0, self.temporal_window_size, steps=self.temporal_window_size)
-        self.W = self.W.reshape((self.temporal_window_size, 1))
+        # self.W = 0.9 ** torch.linspace(0, self.temporal_window_size, steps=self.temporal_window_size)
+        # self.W = self.W.reshape((self.temporal_window_size, 1))
 
-        # self.W = torch.nn.Linear(self.temporal_window_size, 1, bias=False)
+        self.W = torch.nn.Linear(self.temporal_window_size, 1, bias=False)
         self.encoder = torch.nn.Linear(self.num_users, self.hidden_neuron, bias=True)
         self.dropout = torch.nn.Dropout(p=self.dropout_p)
         self.decoder = torch.nn.Linear(self.hidden_neuron, self.num_users, bias=True)
 
     def forward(self, x):
-        x = torch.einsum('bij,jk->bik', x, self.W).squeeze(dim=-1)
-        # x = self.W(x).squeeze(dim=-1)
+        # x = torch.einsum('bij,jk->bik', x, self.W).squeeze(dim=-1)
+        x = self.W(x).squeeze(dim=-1)
         return super().forward(x)
 
 
@@ -158,15 +158,28 @@ class TemporalAutorec(Autorec):
             self.model.seen_users.add(user_item[0])
             self.model.seen_items.add(user_item[1])
 
-        ratings = self._ratings.toarray()
+        # Update the rating info.
+        curr_rating = np.zeros(shape=(self.num_users, self.num_items), dtype=float)
+        if ratings is not None:
+            for (user_id, item_id), (rating, context) in ratings.items():
+                inner_uid = self._outer_to_inner_uid[user_id]
+                inner_iid = self._outer_to_inner_iid[item_id]
+                curr_rating[inner_uid, inner_iid] = rating
+                self._rating_contexts[inner_uid, inner_iid].append(context)
+                assert inner_uid < len(self._users)
+                assert inner_iid < len(self._items)
+
         # Item-based autorec expects rows that represent items
         # pylint: disable=no-member
-        curr_ratings = torch.FloatTensor(ratings.T)
-
-        self.ratings = torch.roll(self.ratings, 1, dims=-1)
-        self.ratings[..., 0] = curr_ratings
+        curr_ratings = torch.FloatTensor(curr_rating.T)
 
         # pylint: disable=no-member
-        self.mask_ratings = torch.FloatTensor(ratings.T).clamp(0, 1)
+        self.mask_ratings = torch.FloatTensor(curr_rating.T).clamp(0, 1)
+
+        for item in range(self.ratings.shape[0]):
+            for user in range(self.ratings.shape[1]):
+                if self.mask_ratings[item, user]:
+                    self.ratings[item, user, :] = torch.roll(self.ratings[item, user, :], 1, dims=-1)
+                    self.ratings[item, user, 0] = curr_ratings[item, user]
 
         self.train_model(self.ratings)

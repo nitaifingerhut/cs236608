@@ -427,11 +427,8 @@ class PredictRecommender(Recommender):
 
 
 class ForeverPredictRecommender(PredictRecommender):
-    def __init__(self, mode: str = "ignore", exclude=None, **strategy_dict):
+    def __init__(self, mode: str = None, exclude=None, **strategy_dict):
         super().__init__(exclude=exclude, **strategy_dict)
-
-        if mode not in ("baseline", "ignore", "reset"):
-            raise ValueError(f"Invalid mode (={mode})")
         self.mode = mode
 
     def recommend(self, user_contexts, num_recommendations):
@@ -465,15 +462,11 @@ class ForeverPredictRecommender(PredictRecommender):
             inner_uid = self._outer_to_inner_uid[user_id]
 
             item_ids = np.arange(len(self._items))
+            item_ids = self._ratings[inner_uid].nonzero()[1]
+            item_ids = np.setdiff1d(np.arange(len(self._items)), item_ids)
 
-            if self.mode in ("baseline", "reset"):
-                item_ids = self._ratings[inner_uid].nonzero()[1]
-                item_ids = np.setdiff1d(np.arange(len(self._items)), item_ids)
-
-            if self.mode == "reset" and len(item_ids) == 0:
-                num_to_reset = np.random.randint(1, len(self._items))
-                indices_to_reset = np.random.choice(np.arange(len(self._items)), (num_to_reset,))
-                self._ratings[inner_uid, indices_to_reset] = 0
+            if self.mode == "continuous" and len(item_ids) == 0:
+                item_ids = np.arange(len(self._items))
 
             item_ids = np.setdiff1d(item_ids, self._exclude_dict[inner_uid])
             user_ids = inner_uid * np.ones(len(item_ids), dtype=np.int)

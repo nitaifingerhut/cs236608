@@ -1,3 +1,11 @@
+"""
+steps: 1000,
+win_size: 1, 3, 5, 10
+rating_freq: 0.2, 0.5, 0.8
+topic_change: 0, 1, 2
+repeats: 10
+eps_greedy: 0.0, 0.15, 0.3
+"""
 import argparse
 import os
 
@@ -13,17 +21,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--steps", type=int, default=100)
     parser.add_argument("--recommender", type=str, default="temporal_autorec", choices=RECOMMENDERS.keys())
-    parser.add_argument("--temporal-window-size", type=int, default=1)
+    parser.add_argument("--temporal-window-size", type=int, default=5)
     parser.add_argument("--num-users", type=int, default=100)
     parser.add_argument("--num-items", type=int, default=100)
     parser.add_argument("--num-topics", type=int, default=10)
     parser.add_argument("--rating-freq", type=float, default=0.2)
     parser.add_argument("--res-dir", type=str)
-    parser.add_argument("--env-type", type=str, choices=('dynamic', 'dynamic-reverse'), default='dynamic')
+    parser.add_argument("--env-type", type=str, choices=('dynamic', 'dynamic-reverse'), default='dynamic-reverse')
     parser.add_argument("--exp-repeats", type=int, default=1)
-    parser.add_argument("--env-topic-change", type=str, default='0,1,2')
-    parser.add_argument("--rec-eps-greedy", type=float, default=None)
-    parser.add_argument("--recommender_mode", type=str, default='baseline')
+    parser.add_argument("--env-topic-change", type=str, default='1')
+    parser.add_argument("--rec-eps-greedy", type=float, default=0.0)
+    parser.add_argument("--recommender_mode", type=str, default='continuous')
     return parser.parse_args()
 
 
