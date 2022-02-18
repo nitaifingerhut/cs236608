@@ -1,3 +1,6 @@
+#!/bin/bash
+
+cd ..
 source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate double-ml
 echo "hello from $(python --version) in $(which python)"
