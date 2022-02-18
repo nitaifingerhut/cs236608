@@ -12,6 +12,7 @@ import os
 from loguru import logger
 from reclab.recommenders import RECOMMENDERS
 from utils.callbacks import ARRI_func, RMSE_func, recommender_losses_func
+from utils.misc import dump_opts_to_json
 from utils.plots import plot_graphs
 from utils.simulation import run_experiment
 
@@ -28,8 +29,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--rating-freq", type=float, default=0.2)
     parser.add_argument("--res-dir", type=str)
     parser.add_argument("--env-type", type=str, choices=('dynamic', 'dynamic-reverse'), default='dynamic-reverse')
-    parser.add_argument("--exp-repeats", type=int, default=1)
-    parser.add_argument("--env-topic-change", type=str, default='1')
+    parser.add_argument("--exp-repeats", type=int, default=15)
+    parser.add_argument("--env-topic-change", type=str, default='0,1,2')
     parser.add_argument("--rec-eps-greedy", type=float, default=0.0)
     parser.add_argument("--recommender_mode", type=str, default='continuous')
     return parser.parse_args()
@@ -98,11 +99,12 @@ if __name__ == "__main__":
         topic_change=topic_changes,
     )
     for k, v in res.items():
-        suffix = f"_{opts.temporal_window_size}" if opts.recommender == "temporal_autorec" else ""
         plot_graphs(
             *list(v.values()),
             title=k,
             legend=True,
             labels=[f"topic_change={x}" for x in topic_changes],
-            save=os.path.join(opts.res_dir, f"{k}{suffix}")
+            save=os.path.join(opts.res_dir, k)
         )
+
+    dump_opts_to_json(opts, os.path.join(opts.res_dir, "opts.json"))

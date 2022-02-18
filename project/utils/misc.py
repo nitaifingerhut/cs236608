@@ -1,8 +1,13 @@
-from contextlib import contextmanager
 import ctypes
 import io
-import os, sys
+import json
+import os
+import sys
 import tempfile
+
+from argparse import Namespace
+from contextlib import contextmanager
+
 
 try:
     libc = ctypes.CDLL(None)
@@ -39,3 +44,9 @@ def stdout_redirector():
     finally:
         tfile.close()
         os.close(saved_stdout_fd)
+
+
+def dump_opts_to_json(opts: Namespace, path: str):
+    params = vars(opts)
+    with open(path, "w") as f:
+        json.dump(params, f, indent=4)
