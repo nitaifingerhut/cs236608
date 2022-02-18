@@ -150,12 +150,15 @@ class Autorec(recommender.ForeverPredictRecommender):
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=self.lr_decay)
 
         self.model.to(self.device)
+        self.losses = []
         for epoch in range(self.train_epoch):
-            self.train(data, optimizer, scheduler)
+            x = self.train(data, optimizer, scheduler)
+            self.losses.extend(x)
 
     def train(self, data, optimizer, scheduler):
         """Train for a single epoch."""
         random_perm_doc_idx = np.random.permutation(self.num_items)
+        losses = []
         for i in range(self.num_batch):
             if i == self.num_batch - 1:
                 batch_set_idx = random_perm_doc_idx[i * self.batch_size :]
@@ -166,6 +169,7 @@ class Autorec(recommender.ForeverPredictRecommender):
             output = self.model(batch)
             mask = self.mask_ratings[batch_set_idx, :].to(self.device)
             loss = self.model.loss(output, batch, mask, lambda_value=self.lambda_value)
+            losses.append(loss.item())
 
             loss.backward()
             if self.grad_clip:
@@ -173,6 +177,7 @@ class Autorec(recommender.ForeverPredictRecommender):
 
             optimizer.step()
             scheduler.step()
+        return losses
 
     @property
     def name(self):  # noqa: D102

@@ -39,7 +39,7 @@ def run_simulation(
             # items, users, ratings = env.reset()
             users, items, ratings = env.reset()
 
-        recommender.reset(items, users, ratings)
+        recommender.reset(users, items, ratings)
 
     results = None
     if len(callbacks) != 0:

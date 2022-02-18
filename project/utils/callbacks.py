@@ -16,3 +16,7 @@ def RMSE_func(env, recommender, **kwargs):
 
 def user_preferences(env, recommender, user_id: int = 0, **kwargs):
     return env._user_preferences[user_id]
+
+
+def recommender_losses_func(env, recommender, **kwargs):
+    return recommender.losses

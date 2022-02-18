@@ -24,18 +24,23 @@ class TemporalAutoRecLib(AutoRecLib):
 
     def loss(self, pred, test, mask, lambda_value=1):
         autorec_loss = super().loss(pred, test, mask, lambda_value)
-        reg_value_time_enc = torch.mul(lambda_value / 2, list(self.time_encoder.parameters())[0].norm(p="fro") ** 2)
+        # reg_value_time_enc = torch.mul(lambda_value / 2, list(self.W.parameters())[0].norm(p="fro") ** 2)
+        reg_value_time_enc = torch.mul(lambda_value / 2, self.W.norm(p="fro") ** 2)
         total_loss = autorec_loss + reg_value_time_enc
         return total_loss
 
     def prepare_model(self):
-        self.time_encoder = torch.nn.Linear(self.temporal_window_size, 1, bias=True)
+        self.W = 0.9 ** torch.linspace(0, self.temporal_window_size, steps=self.temporal_window_size)
+        self.W = self.W.reshape((self.temporal_window_size, 1))
+
+        # self.W = torch.nn.Linear(self.temporal_window_size, 1, bias=False)
         self.encoder = torch.nn.Linear(self.num_users, self.hidden_neuron, bias=True)
         self.dropout = torch.nn.Dropout(p=self.dropout_p)
         self.decoder = torch.nn.Linear(self.hidden_neuron, self.num_users, bias=True)
 
     def forward(self, x):
-        x = self.time_encoder(x).squeeze(dim=-1)
+        x = torch.einsum('bij,jk->bik', x, self.W).squeeze(dim=-1)
+        # x = self.W(x).squeeze(dim=-1)
         return super().forward(x)
 
 
@@ -75,7 +80,7 @@ class TemporalAutorec(Autorec):
         self,
         num_users,
         num_items,
-        temporal_window_size: int = 10,
+        temporal_window_size: int = 1,
         hidden_neuron: int = 500,
         lambda_value: float = 1,
         train_epoch: int = 1000,
@@ -123,6 +128,7 @@ class TemporalAutorec(Autorec):
     def train(self, data, optimizer, scheduler):
         """Train for a single epoch."""
         random_perm_doc_idx = np.random.permutation(self.num_items)
+        losses = []
         for i in range(self.num_batch):
             if i == self.num_batch - 1:
                 batch_set_idx = random_perm_doc_idx[i * self.batch_size :]
@@ -134,6 +140,7 @@ class TemporalAutorec(Autorec):
             mask = self.mask_ratings[batch_set_idx, :].to(self.device)
             last_rating = batch[..., 0]
             loss = self.model.loss(output, last_rating, mask, lambda_value=self.lambda_value)
+            losses.append(loss.item())
 
             loss.backward()
             if self.grad_clip:
@@ -141,6 +148,7 @@ class TemporalAutorec(Autorec):
 
             optimizer.step()
             scheduler.step()
+        return losses
 
     def update(self, users=None, items=None, ratings=None):  # noqa: D102
         super(recommender.ForeverPredictRecommender, self).update(users, items, ratings)
