@@ -17,6 +17,8 @@ def run_simulation(
     retrain: bool = True,
     callbacks: List[Callable] = [],
     callbacks_kwargs: Dict = dict(),
+    post_proc_callbacks: List[Callable] = [],
+    post_proc_callbacks_kwargs: Dict = dict(),
     reset: bool = True,
     seed: int = 42,
     label: str = None,
@@ -51,13 +53,15 @@ def run_simulation(
             results[j].append(res)
 
         online_users = env.online_users
-        recommendations, predicted_ratings = recommender.recommend(online_users, rpu)
+        recommendations, _ = recommender.recommend(online_users, rpu)
         _, _, ratings, _ = env.step(recommendations)
         recommender.update(ratings=ratings)
 
         if retrain and hasattr(recommender, "_model") and isinstance(recommender, LibFM_MLHB):
             with stdout_redirector():
                 recommender._model.train(recommender._train_data)  # Specificaly for libfm.
+    for j, post_proc_callback in enumerate(post_proc_callbacks):
+        results[j] = post_proc_callback(results[j], **post_proc_callbacks_kwargs)
     return results
 
 
@@ -70,6 +74,8 @@ def run_experiment(
     retrain: bool = True,
     callbacks: List[Callable] = [],
     callbacks_kwargs: Dict = dict(),
+    post_proc_callbacks: List[Callable] = [],
+    post_proc_callbacks_kwargs: Dict = dict(),
     reset: bool = True,
     **kwargs,
 ):
@@ -95,6 +101,8 @@ def run_experiment(
                     retrain=retrain,
                     callbacks=callbacks,
                     callbacks_kwargs=callbacks_kwargs,
+                    post_proc_callbacks=post_proc_callbacks,
+                    post_proc_callbacks_kwargs=post_proc_callbacks_kwargs,
                     reset=reset,
                     seed=r,
                     label=f"{k}={vv}, repeat={str(r).zfill(2)}",

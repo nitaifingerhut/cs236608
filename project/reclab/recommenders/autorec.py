@@ -151,7 +151,7 @@ class Autorec(recommender.ForeverPredictRecommender):
 
         self.model.to(self.device)
         self.losses = []
-        for epoch in range(self.train_epoch):
+        for _ in range(self.train_epoch):
             x = self.train(data, optimizer, scheduler)
             self.losses.extend(x)
 

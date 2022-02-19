@@ -8,10 +8,10 @@ eps_greedy: 0.0, 0.15, 0.3
 """
 import argparse
 import os
-
+import re
 from loguru import logger
 from reclab.recommenders import RECOMMENDERS
-from utils.callbacks import ARRI_func, RMSE_func, recommender_losses_func
+from utils.callbacks import *
 from utils.misc import dump_opts_to_json
 from utils.plots import plot_graphs
 from utils.simulation import run_experiment
@@ -81,8 +81,10 @@ if __name__ == "__main__":
     if opts.rec_eps_greedy:
         recommender.update_strategy(opts.rec_eps_greedy)
 
-    callbacks_kwargs = dict(user_id=0)
-    callbacks = [RMSE_func, ARRI_func]#, recommender_losses_func]#, user_preferences]
+    callbacks_kwargs = dict(user_id=0, steps=opts.steps)
+    callbacks = [RMSE_func, ARRI_func, REC_LAST_STEP_LOSSES_func]
+    post_proc_callbacks_kwargs = dict()
+    post_proc_callbacks = [eval_post_proc(c) for c in callbacks]
 
     repeats = opts.exp_repeats
     topic_changes = opts.env_topic_change
@@ -95,6 +97,8 @@ if __name__ == "__main__":
         retrain=True,
         callbacks=callbacks,
         callbacks_kwargs=callbacks_kwargs,
+        post_proc_callbacks=post_proc_callbacks,
+        post_proc_callbacks_kwargs=post_proc_callbacks_kwargs,
         reset=True,
         topic_change=topic_changes,
     )
