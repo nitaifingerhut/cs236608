@@ -101,10 +101,10 @@ class Autorec(recommender.ForeverPredictRecommender):
         lr_decay=1e-2,
         dropout=0.05,
         random_seed=0,
-        recommender_mode: str = "ignore",
+        rec_mode: str = "ignore",
     ):
         """Create new Autorec recommender."""
-        super().__init__(mode=recommender_mode)
+        super().__init__(mode=rec_mode)
 
         # We only want the function arguments so remove class related objects.
         self._hyperparameters.update(locals())
@@ -150,7 +150,7 @@ class Autorec(recommender.ForeverPredictRecommender):
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=self.lr_decay)
 
         self.model.to(self.device)
-        for epoch in range(self.train_epoch):
+        for _ in range(self.train_epoch):
             self.train(data, optimizer, scheduler)
 
     def train(self, data, optimizer, scheduler):

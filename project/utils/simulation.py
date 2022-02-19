@@ -25,8 +25,8 @@ def run_simulation(
         env.seed(seed)
         if hasattr(env, "_topic_change"):
             temp = env._topic_change  # Specificaly for topics.
-            env._topic_change = 0  # TODO: I dont think this assignment and re-assignment is needed... (manorz, Feb 14) 
-            # items, users, ratings = env.reset()  # Wrong order of return values (manorz, Jan 01)
+            env._topic_change = 0  # TODO: I dont think this assignment and re-assignment is needed... (manorz, 14/02/22) 
+            # items, users, ratings = env.reset()  # Wrong order of return values (manorz, 01/01/22)
             users, items, ratings = env.reset()
             env._topic_change = temp
         elif hasattr(env, "_affinity_change "):
@@ -39,7 +39,8 @@ def run_simulation(
             # items, users, ratings = env.reset()
             users, items, ratings = env.reset()
 
-        recommender.reset(items, users, ratings)
+        # recommender.reset(items, users, ratings)
+        recommender.reset(users, items, ratings)  # Wrong order of arguments (manorz, 02/17/22)
 
     results = None
     if len(callbacks) != 0:

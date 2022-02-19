@@ -19,7 +19,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--steps", type=int, default=100)
-    parser.add_argument("--recommender", type=str, default="autorec", choices=RECOMMENDERS.keys())
+    parser.add_argument("--rec", type=str, default="autorec", choices=RECOMMENDERS.keys())
     parser.add_argument("--num-users", type=int, default=100)
     parser.add_argument("--num-items", type=int, default=100)
     parser.add_argument("--num-topics", type=int, default=10)
@@ -30,7 +30,8 @@ def parse_args() -> argparse.Namespace:
     # parser.add_argument("--env-topic-change", nargs='+', type=float)  # For some weird bug in nargs='+' only in VsCode... (manorz, 02/12/22)
     parser.add_argument("--env-topic-change", type=str, default='0,1,2')
     parser.add_argument("--rec-eps-greedy", type=float)
-    parser.add_argument("--recommender_mode", type=str, default='baseline')
+    parser.add_argument("--rec-mode", type=str, default='baseline')
+    parser.add_argument("--rec-temp-window-size", type=int)
     return parser.parse_args()
 
 
@@ -39,7 +40,7 @@ if __name__ == "__main__":
     try:
         opts.res_dir = os.path.join('results', opts.res_dir)
     except TypeError as _:
-        opts.res_dir = os.path.join('results', opts.env_type, opts.recommender)
+        opts.res_dir = os.path.join('results', opts.env_type, opts.rec)
         if opts.rec_eps_greedy:
             opts.res_dir = os.path.join(opts.res_dir, f'eps_greedy={opts.rec_eps_greedy}')
     opts.res_dir = os.path.abspath(opts.res_dir)
@@ -53,6 +54,11 @@ if __name__ == "__main__":
     
     opts.env_topic_change = [float(x) for x in opts.env_topic_change.split(',')]
 
+    if (opts.rec == 'temporal_autorec') and (opts.rec_temp_window_size is None):
+        raise argparse.ArgumentTypeError('temporal_autorec must have rec_temp_window_size')
+    if  (opts.rec != 'temporal_autorec') and (opts.rec_temp_window_size is not None):
+        raise argparse.ArgumentTypeError('non-temporal_autorec can\'t have rec_temp_window_size')
+
     env_params = {
         "num_topics": opts.num_topics,
         "num_users": opts.num_users,
@@ -63,16 +69,18 @@ if __name__ == "__main__":
         "user_model": opts.env_type,
     }
     
-    Autorec_params = {
+    autorec_params = {
         "num_users": opts.num_users,
         "num_items": opts.num_items,
         "hidden_neuron": 500,
         "train_epoch": 100,
         "random_seed": opts.seed,
-        "recommender_mode": opts.recommender_mode
+        "rec_mode": opts.rec_mode,
     }
+    if opts.rec == 'temporal_autorec':
+        autorec_params['temporal_window_size'] = opts.rec_temp_window_size
 
-    recommender = RECOMMENDERS[opts.recommender](**Autorec_params)
+    recommender = RECOMMENDERS[opts.rec](**autorec_params)
 
     if opts.rec_eps_greedy:
         recommender.update_strategy(opts.rec_eps_greedy)
