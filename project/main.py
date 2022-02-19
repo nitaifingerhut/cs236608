@@ -103,12 +103,15 @@ if __name__ == "__main__":
         topic_change=topic_changes,
     )
     for k, v in res.items():
+        means = [vv['mean'] for vv in v.values()]
+        stds  = [vv['std'] for vv in v.values()]
         plot_graphs(
-            *list(v.values()),
+            *means,
+            error_bars=stds,
             title=k,
             legend=True,
             labels=[f"topic_change={x}" for x in topic_changes],
-            save=os.path.join(opts.res_dir, k)
+            save=os.path.join(opts.res_dir, k),
         )
 
     dump_opts_to_json(opts, os.path.join(opts.res_dir, "opts.json"))

@@ -111,6 +111,10 @@ def run_experiment(
                     callbacks_res[n][vv].append(_res[i])
 
             for i, n in enumerate(callbacks_names):
-                callbacks_res[n][vv] = list(np.mean(np.asarray(callbacks_res[n][vv]), axis=0))
+                # callbacks_res[n][vv] = list(np.mean(np.asarray(callbacks_res[n][vv]), axis=0))
+                callbacks_res[n][vv] = {
+                    'mean'  :   list(np.mean(np.asarray(callbacks_res[n][vv]), axis=0)),
+                    'std'   :   list(np.std(np.asarray(callbacks_res[n][vv]), axis=0)),
+                }
 
     return callbacks_res
