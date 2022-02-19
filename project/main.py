@@ -73,7 +73,7 @@ if __name__ == "__main__":
         "random_seed": opts.seed,
         "recommender_mode": opts.recommender_mode,
     }
-    if opts.recommender == "temporal_autorec":
+    if opts.recommender in ["temporal_autorec", "temporal_autorec2"]:
         Autorec_params.update({"temporal_window_size": opts.temporal_window_size})
 
     recommender = RECOMMENDERS[opts.recommender](**Autorec_params)
