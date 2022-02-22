@@ -35,7 +35,7 @@ class TemporalAutoRecLib2(TemporalAutoRecLib):
     def forward(self, x):
         temp_rat_embd = self.temp_rat_encoder(x[0]).squeeze(dim=-1)
         temp_rec_embd = self.temp_rec_encoder(x[1]).squeeze(dim=-1)
-        temp_all_embd = temp_rat_embd + temp_rec_embd
+        temp_all_embd = temp_rat_embd + temp_rec_embd[None, ...]
         return super(TemporalAutoRecLib, self).forward(temp_all_embd)
     
     def predict(self, user_item, test_data):
@@ -72,6 +72,8 @@ class TemporalAutorec2(TemporalAutorec):
         dropout: float = 0.05,
         random_seed: int = 0,
         recommender_mode: str = "ignore",
+        rats_init_mode: str = "zeros",
+        recs_init_mode: str = "zeros",
     ):
 
         super().__init__(
@@ -89,6 +91,7 @@ class TemporalAutorec2(TemporalAutorec):
                 dropout,
                 random_seed,
                 recommender_mode,
+                rats_init_mode,
         )
 
         # Override the TemporalAutorecLib with 'TemporalAutoRecLib2'
@@ -105,7 +108,10 @@ class TemporalAutorec2(TemporalAutorec):
 
         self.first = True
         # Init cyclic buffer for the recommendations history
-        self.recommendations = torch.zeros(num_users, temporal_window_size)
+        if recs_init_mode == "randint":
+            self.recommendations = torch.randint(0, num_items, size=(num_users, temporal_window_size), dtype=torch.float32)
+        else:
+            self.recommendations = torch.zeros(num_users, temporal_window_size, dtype=torch.float32)
 
     def reset(self, users=None, items=None, ratings=None):  # noqa: D102
         super().reset(users, items, ratings)
@@ -178,12 +184,13 @@ class TemporalAutorec2(TemporalAutorec):
             elif i < self.num_batch - 1:
                 batch_set_idx = random_perm_doc_idx[i * self.batch_size : (i + 1) * self.batch_size]
 
-            ratings_batch =         ratings[batch_set_idx, :].to(self.device)
-            recommendations_batch = recommendations[batch_set_idx, :].to(self.device)
+            ratings_batch = ratings[batch_set_idx, :].to(self.device)
+            recommendations_batch = recommendations.to(self.device)
 
             output = self.model((ratings_batch, recommendations_batch))
             mask = self.mask_ratings[batch_set_idx, :].to(self.device)
-            loss = self.model.loss(output, ratings_batch, mask, lambda_value=self.lambda_value)
+            last_rating = ratings_batch[..., 0]
+            loss = self.model.loss(output, last_rating, mask, lambda_value=self.lambda_value)
             losses.append(loss.item())
 
             loss.backward()

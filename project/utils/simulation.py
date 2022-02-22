@@ -47,10 +47,11 @@ def run_simulation(
     if len(callbacks) != 0:
         results = [[] for _ in callbacks]
 
-    for _ in tqdm(range(steps), desc=label):
-        for j, callback in enumerate(callbacks):
-            res = callback(env, recommender, **callbacks_kwargs)
-            results[j].append(res)
+    for i in tqdm(range(steps), desc=label):
+        if i != 0:
+            for j, callback in enumerate(callbacks):
+                res = callback(env, recommender, **callbacks_kwargs)
+                results[j].append(res)
 
         online_users = env.online_users
         recommendations, _ = recommender.recommend(online_users, rpu)

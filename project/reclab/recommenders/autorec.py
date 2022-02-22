@@ -21,10 +21,10 @@ class AutoRecLib(torch.nn.Module):
         self.sigmoid = torch.nn.Sigmoid()
 
     def loss(self, pred, test, mask, lambda_value=1):
-        mse = (((pred * mask) - test) ** 2).sum()
-        reg_value_enc = torch.mul(lambda_value / 2, list(self.encoder.parameters())[0].norm(p="fro") ** 2)
-        reg_value_dec = torch.mul(lambda_value / 2, list(self.decoder.parameters())[0].norm(p="fro") ** 2)
-        return torch.add(mse, torch.add(reg_value_enc, reg_value_dec))
+        mse = (((pred - test) * mask) ** 2).mean()
+        # reg_value_enc = torch.mul(lambda_value / 2, list(self.encoder.parameters())[0].norm(p="fro") ** 2)
+        # reg_value_dec = torch.mul(lambda_value / 2, list(self.decoder.parameters())[0].norm(p="fro") ** 2)
+        return mse # torch.add(mse, torch.add(reg_value_enc, reg_value_dec))
 
     def prepare_model(self):
         self.encoder = torch.nn.Linear(self.num_users, self.hidden_neuron, bias=True)

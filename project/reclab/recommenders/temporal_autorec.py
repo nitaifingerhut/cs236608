@@ -24,9 +24,9 @@ class TemporalAutoRecLib(AutoRecLib):
 
     def loss(self, pred, test, mask, lambda_value=1):
         autorec_loss = super().loss(pred, test, mask, lambda_value)
-        reg_value_time_enc = torch.mul(lambda_value / 2, list(self.W.parameters())[0].norm(p="fro") ** 2)
+        #reg_value_time_enc = torch.mul(lambda_value / 2, list(self.W.parameters())[0].norm(p="fro") ** 2)
         # reg_value_time_enc = torch.mul(lambda_value / 2, self.W.norm(p="fro") ** 2)
-        total_loss = autorec_loss + reg_value_time_enc
+        total_loss = autorec_loss #+ reg_value_time_enc
         return total_loss
 
     def prepare_model(self):
@@ -92,6 +92,7 @@ class TemporalAutorec(Autorec):
         dropout: float = 0.05,
         random_seed: int = 0,
         recommender_mode: str = "ignore",
+        rats_init_mode: str = "zeros",
     ):
         """Create new Autorec recommender."""
         super().__init__(
@@ -123,7 +124,10 @@ class TemporalAutorec(Autorec):
         )
 
         # Init cyclic buffer
-        self.ratings = torch.zeros(num_items, num_users, temporal_window_size)
+        if rats_init_mode == "randint":
+            self.ratings = torch.randint(0, 5, size=(num_items, num_users, temporal_window_size), dtype=torch.float32)
+        else:
+            self.ratings = torch.zeros(num_items, num_users, temporal_window_size, dtype=torch.float32)
 
     def train(self, data, optimizer, scheduler):
         """Train for a single epoch."""

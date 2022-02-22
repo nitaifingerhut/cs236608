@@ -1,16 +1,8 @@
-"""
-steps: 1000,
-win_size: 1, 3, 5, 10
-rating_freq: 0.2, 0.5, 0.8
-topic_change: 0, 1, 2
-repeats: 10
-eps_greedy: 0.0, 0.15, 0.3
-"""
 import argparse
 import os
-import re
-from loguru import logger
+
 from reclab.recommenders import RECOMMENDERS
+from typing import List
 from utils.callbacks import *
 from utils.misc import dump_opts_to_json
 from utils.plots import plot_graphs
@@ -21,18 +13,20 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--steps", type=int, default=100)
-    parser.add_argument("--recommender", type=str, default="temporal_autorec", choices=RECOMMENDERS.keys())
-    parser.add_argument("--temporal-window-size", type=int, default=5)
+    parser.add_argument("--recommender", type=str, default="temporal_autorec2", choices=RECOMMENDERS.keys())
+    parser.add_argument("--temporal-window-size", type=int, default=3)
     parser.add_argument("--num-users", type=int, default=100)
-    parser.add_argument("--num-items", type=int, default=100)
+    parser.add_argument("--num-items", type=int, default=50)
     parser.add_argument("--num-topics", type=int, default=10)
     parser.add_argument("--rating-freq", type=float, default=0.2)
     parser.add_argument("--res-dir", type=str)
     parser.add_argument("--env-type", type=str, choices=('dynamic', 'dynamic-reverse'), default='dynamic-reverse')
-    parser.add_argument("--exp-repeats", type=int, default=15)
-    parser.add_argument("--env-topic-change", type=str, default='0,1,2')
+    parser.add_argument("--exp-repeats", type=int, default=1)
+    parser.add_argument("--env-topic-change", type=str, default='0,1')
     parser.add_argument("--rec-eps-greedy", type=float, default=0.0)
-    parser.add_argument("--recommender_mode", type=str, default='continuous')
+    parser.add_argument("--recommender-mode", type=str, default='continuous')
+    parser.add_argument("--rats-init-mode", type=str, default='zeros')
+    parser.add_argument("--recs-init-mode", type=str, default='zeros')
     return parser.parse_args()
 
 
@@ -53,7 +47,7 @@ if __name__ == "__main__":
     if opts.rec_eps_greedy:
         opts.rec_eps_greedy = {'type': 'eps_greedy', 'eps': opts.rec_eps_greedy}
 
-    opts.env_topic_change: list = [float(x) for x in opts.env_topic_change.split(',')]
+    opts.env_topic_change: List[float] = [float(x) for x in opts.env_topic_change.split(',')]
 
     env_params = {
         "num_topics": opts.num_topics,
@@ -74,7 +68,11 @@ if __name__ == "__main__":
         "recommender_mode": opts.recommender_mode,
     }
     if opts.recommender in ["temporal_autorec", "temporal_autorec2"]:
-        Autorec_params.update({"temporal_window_size": opts.temporal_window_size})
+        Autorec_params.update({
+            "temporal_window_size": opts.temporal_window_size, "rats_init_mode": opts.rats_init_mode
+        })
+    if opts.recommender in ["temporal_autorec2"]:
+        Autorec_params.update({"recs_init_mode": opts.recs_init_mode})
 
     recommender = RECOMMENDERS[opts.recommender](**Autorec_params)
 
@@ -104,7 +102,7 @@ if __name__ == "__main__":
     )
     for k, v in res.items():
         means = [vv['mean'] for vv in v.values()]
-        stds  = [vv['std'] for vv in v.values()]
+        stds = [vv['std'] for vv in v.values()]
         plot_graphs(
             *means,
             error_bars=stds,

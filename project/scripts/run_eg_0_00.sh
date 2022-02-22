@@ -5,15 +5,15 @@ source $HOME/miniconda3/etc/profile.d/conda.sh
 conda activate double-ml
 echo "hello from $(python --version) in $(which python)"
 
-python -m main --steps 1000 --temporal-window-size 1  --rating-freq 0.2 --rec-eps-greedy 0.0 --res-dir st_1000_tp_01_rf_0_2_eg_0_0
-python -m main --steps 1000 --temporal-window-size 3  --rating-freq 0.2 --rec-eps-greedy 0.0 --res-dir st_1000_tp_03_rf_0_2_eg_0_0
-python -m main --steps 1000 --temporal-window-size 5  --rating-freq 0.2 --rec-eps-greedy 0.0 --res-dir st_1000_tp_05_rf_0_2_eg_0_0
-python -m main --steps 1000 --temporal-window-size 10 --rating-freq 0.2 --rec-eps-greedy 0.0 --res-dir st_1000_tp_10_rf_0_2_eg_0_0
-python -m main --steps 1000 --temporal-window-size 1  --rating-freq 0.5 --rec-eps-greedy 0.0 --res-dir st_1000_tp_01_rf_0_5_eg_0_0
-python -m main --steps 1000 --temporal-window-size 3  --rating-freq 0.5 --rec-eps-greedy 0.0 --res-dir st_1000_tp_03_rf_0_5_eg_0_0
-python -m main --steps 1000 --temporal-window-size 5  --rating-freq 0.5 --rec-eps-greedy 0.0 --res-dir st_1000_tp_05_rf_0_5_eg_0_0
-python -m main --steps 1000 --temporal-window-size 10 --rating-freq 0.5 --rec-eps-greedy 0.0 --res-dir st_1000_tp_10_rf_0_5_eg_0_0
-python -m main --steps 1000 --temporal-window-size 1  --rating-freq 0.8 --rec-eps-greedy 0.0 --res-dir st_1000_tp_01_rf_0_8_eg_0_0
-python -m main --steps 1000 --temporal-window-size 3  --rating-freq 0.8 --rec-eps-greedy 0.0 --res-dir st_1000_tp_03_rf_0_8_eg_0_0
-python -m main --steps 1000 --temporal-window-size 5  --rating-freq 0.8 --rec-eps-greedy 0.0 --res-dir st_1000_tp_05_rf_0_8_eg_0_0
-python -m main --steps 1000 --temporal-window-size 10 --rating-freq 0.8 --rec-eps-greedy 0.0 --res-dir st_1000_tp_10_rf_0_8_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec --rats-init-mode zeros   --recs-init-mode zeros    --temporal-window-size 1 --rec-eps-greedy 0.0 --res-dir st_500_ta_rat_0_rec_0_tw_1_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec --rats-init-mode zeros   --recs-init-mode zeros    --temporal-window-size 3 --rec-eps-greedy 0.0 --res-dir st_500_ta_rat_0_rec_0_tw_3_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec --rats-init-mode zeros   --recs-init-mode zeros    --temporal-window-size 5 --rec-eps-greedy 0.0 --res-dir st_500_ta_rat_0_rec_0_tw_5_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec --rats-init-mode randint --recs-init-mode randint  --temporal-window-size 1 --rec-eps-greedy 0.0 --res-dir st_500_ta_rat_r_rec_r_tw_1_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec --rats-init-mode randint --recs-init-mode randint  --temporal-window-size 3 --rec-eps-greedy 0.0 --res-dir st_500_ta_rat_r_rec_r_tw_3_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec --rats-init-mode randint --recs-init-mode randint  --temporal-window-size 5 --rec-eps-greedy 0.0 --res-dir st_500_ta_rat_r_rec_r_tw_5_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec2 --rats-init-mode zeros   --recs-init-mode zeros   --temporal-window-size 1 --rec-eps-greedy 0.0 --res-dir st_500_ta2_rat_0_rec_0_tw_1_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec2 --rats-init-mode zeros   --recs-init-mode zeros   --temporal-window-size 3 --rec-eps-greedy 0.0 --res-dir st_500_ta2_rat_0_rec_0_tw_3_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec2 --rats-init-mode zeros   --recs-init-mode zeros   --temporal-window-size 5 --rec-eps-greedy 0.0 --res-dir st_500_ta2_rat_0_rec_0_tw_5_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec2 --rats-init-mode randint --recs-init-mode randint --temporal-window-size 1 --rec-eps-greedy 0.0 --res-dir st_500_ta2_rat_r_rec_r_tw_1_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec2 --rats-init-mode randint --recs-init-mode randint --temporal-window-size 3 --rec-eps-greedy 0.0 --res-dir st_500_ta2_rat_r_rec_r_tw_3_eg_0_0
+python -m main --steps 500 --recommender temporal_autorec2 --rats-init-mode randint --recs-init-mode randint --temporal-window-size 5 --rec-eps-greedy 0.0 --res-dir st_500_ta2_rat_r_rec_r_tw_5_eg_0_0
