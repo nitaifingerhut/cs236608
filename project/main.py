@@ -1,5 +1,6 @@
 import argparse
 import os
+import pickle as pkl
 
 from reclab.recommenders import RECOMMENDERS
 from typing import List
@@ -111,5 +112,8 @@ if __name__ == "__main__":
             labels=[f"topic_change={x}" for x in topic_changes],
             save=os.path.join(opts.res_dir, k),
         )
+
+    with open(os.path.join(opts.res_dir, "results.pkl"), mode="wb") as f:
+        pkl.dump(res, f)
 
     dump_opts_to_json(opts, os.path.join(opts.res_dir, "opts.json"))
