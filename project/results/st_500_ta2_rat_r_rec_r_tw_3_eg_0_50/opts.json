@@ -1,0 +1,24 @@
+{
+    "seed": 42,
+    "steps": 500,
+    "recommender": "temporal_autorec2",
+    "temporal_window_size": 3,
+    "num_users": 100,
+    "num_items": 50,
+    "num_topics": 10,
+    "rating_freq": 0.2,
+    "res_dir": "/home/nitai/cs236608/project/results/st_500_ta2_rat_r_rec_r_tw_3_eg_0_50",
+    "env_type": "dynamic-reverse",
+    "exp_repeats": 10,
+    "env_topic_change": [
+        0.0,
+        1.0
+    ],
+    "rec_eps_greedy": {
+        "type": "eps_greedy",
+        "eps": 0.5
+    },
+    "recommender_mode": "continuous",
+    "rats_init_mode": "randint",
+    "recs_init_mode": "randint"
+}
