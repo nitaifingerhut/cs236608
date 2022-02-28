@@ -188,7 +188,7 @@ class Autorec(recommender.ForeverPredictRecommender):
         return self.model.predict(user_item, self.ratings.to(self.device))
 
     def reset(self, users=None, items=None, ratings=None):  # noqa: D102
-        self.model.prepare_model()  # TODO: check if necessary since AutoRec calls this in his update method 5 lines below. (manorz, 02/16/22)
+        self.model.prepare_model()
         super().reset(users, items, ratings)
 
     def update(self, users=None, items=None, ratings=None):  # noqa: D102

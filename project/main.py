@@ -74,6 +74,8 @@ if __name__ == "__main__":
         })
     if opts.recommender in ["temporal_autorec2"]:
         Autorec_params.update({"recs_init_mode": opts.recs_init_mode})
+    if opts.recommender in ['autorec_w_topics']:
+        Autorec_params.update({'num_topics': opts.num_topics})
 
     recommender = RECOMMENDERS[opts.recommender](**Autorec_params)
 

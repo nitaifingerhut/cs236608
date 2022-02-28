@@ -1,0 +1,21 @@
+{
+    "seed": 42,
+    "steps": 100,
+    "recommender": "autorec",
+    "temporal_window_size": 3,
+    "num_users": 100,
+    "num_items": 100,
+    "num_topics": 10,
+    "rating_freq": 0.2,
+    "res_dir": "/home/manorz/cs236608/project/results/dynamic/autorec",
+    "env_type": "dynamic",
+    "exp_repeats": 5,
+    "env_topic_change": [
+        0.0,
+        1.0
+    ],
+    "rec_eps_greedy": 0.0,
+    "recommender_mode": "continuous",
+    "rats_init_mode": "zeros",
+    "recs_init_mode": "zeros"
+}

@@ -2,6 +2,7 @@ import numpy as np
 
 from reclab.environments.environment import Environment
 from reclab.environments.topics import Topics
+from reclab.recommenders.autorec_w_topics import Autorec_W_Topics
 from reclab.recommenders.recommender import Recommender
 from reclab.recommenders.libfm import LibFM_MLHB
 from tqdm import tqdm
@@ -40,7 +41,9 @@ def run_simulation(
         else:
             # items, users, ratings = env.reset()
             users, items, ratings = env.reset()
-
+        if isinstance(recommender, Autorec_W_Topics):
+            ratings = {k: (v[0], v[1], env._item_topics[k[1]]) for k,v in ratings.items()}
+            recommender.set_item_topics(env._item_topics)
         recommender.reset(users, items, ratings)
 
     results = None
@@ -56,6 +59,9 @@ def run_simulation(
         online_users = env.online_users
         recommendations, _ = recommender.recommend(online_users, rpu)
         _, _, ratings, _ = env.step(recommendations)
+        if isinstance(recommender, Autorec_W_Topics):
+            ratings = {k: (v[0], v[1], env._item_topics[k[1]]) for k,v in ratings.items()}
+            recommender.set_item_topics(env._item_topics)        
         recommender.update(ratings=ratings)
 
         if retrain and hasattr(recommender, "_model") and isinstance(recommender, LibFM_MLHB):
