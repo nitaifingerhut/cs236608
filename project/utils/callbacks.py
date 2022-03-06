@@ -17,7 +17,7 @@ def RMSE_func(env, recommender, **kwargs):
     return np.sqrt(np.mean((predicted_ratings - true_ratings) ** 2))
 
 
-def user_preferences(env, recommender, user_id: int = 0, **kwargs):
+def user_preferences_func(env, recommender, user_id: int = 0, **kwargs):
     return env._user_preferences[user_id]
 
 

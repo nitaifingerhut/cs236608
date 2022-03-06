@@ -2,6 +2,7 @@ import argparse
 import os
 import pickle as pkl
 
+from pathlib import Path
 from reclab.recommenders import RECOMMENDERS
 from typing import List
 from utils.callbacks import *
@@ -14,16 +15,16 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--steps", type=int, default=100)
-    parser.add_argument("--recommender", type=str, default="temporal_autorec2", choices=RECOMMENDERS.keys())
-    parser.add_argument("--temporal-window-size", type=int, default=3)
+    parser.add_argument("--recommender", type=str, default="autorec", choices=RECOMMENDERS.keys())
+    parser.add_argument("--temporal-window-size", type=int, default=1)
     parser.add_argument("--num-users", type=int, default=100)
     parser.add_argument("--num-items", type=int, default=50)
     parser.add_argument("--num-topics", type=int, default=10)
-    parser.add_argument("--rating-freq", type=float, default=0.2)
+    parser.add_argument("--rating-freq", type=float, default=1.0)
     parser.add_argument("--res-dir", type=str)
-    parser.add_argument("--env-type", type=str, choices=('dynamic', 'dynamic-reverse'), default='dynamic-reverse')
-    parser.add_argument("--exp-repeats", type=int, default=10)
-    parser.add_argument("--env-topic-change", type=str, default='0,1')
+    parser.add_argument("--env-type", type=str, choices=('dynamic', 'dynamic-reverse'), default='dynamic')
+    parser.add_argument("--exp-repeats", type=int, default=1)
+    parser.add_argument("--env-topic-change", type=str, default='1')
     parser.add_argument("--rec-eps-greedy", type=float, default=0.0)
     parser.add_argument("--recommender-mode", type=str, default='continuous')
     parser.add_argument("--rats-init-mode", type=str, default='zeros')
@@ -82,10 +83,10 @@ if __name__ == "__main__":
     if opts.rec_eps_greedy:
         recommender.update_strategy(opts.rec_eps_greedy)
 
-    callbacks_kwargs = dict(user_id=0, steps=opts.steps)
-    callbacks = [RMSE_func, ARRI_func, REC_LAST_STEP_LOSSES_func]
+    callbacks_kwargs = dict(user_id=42, steps=opts.steps)
+    callbacks = [user_preferences_func]  #[RMSE_func, ARRI_func, REC_LAST_STEP_LOSSES_func]
     post_proc_callbacks_kwargs = dict()
-    post_proc_callbacks = [eval_post_proc(c) for c in callbacks]
+    post_proc_callbacks = []  #[eval_post_proc(c) for c in callbacks]
 
     repeats = opts.exp_repeats
     topic_changes = opts.env_topic_change
@@ -103,6 +104,10 @@ if __name__ == "__main__":
         reset=True,
         topic_change=topic_changes,
     )
+
+    with open(Path("~/Desktop/res.pkl").expanduser(), "wb") as f:
+        pkl.dump(res, f)
+
     for k, v in res.items():
         means = [vv['mean'] for vv in v.values()]
         stds = [vv['std'] for vv in v.values()]
