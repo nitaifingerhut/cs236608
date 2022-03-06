@@ -27,15 +27,11 @@ def run_simulation(
     if reset:
         env.seed(seed)
         if hasattr(env, "_topic_change"):
-            temp = env._topic_change  # Specificaly for topics.
-            # env._topic_change = 0  # TODO: I dont think this assignment and re-assignment is needed... (manorz, Feb 14)
-            # items, users, ratings = env.reset()  # Wrong order of return values (manorz, Jan 01)
             users, items, ratings = env.reset()
-            env._topic_change = temp
         elif hasattr(env, "_affinity_change "):
             temp = env._affinity_change  # Specificaly for latent factor.
             env._affinity_change = 0
-            # items, users, ratings = env.reset()
+            # items, users, ratings = env.reset()  # Wrong order of return values (manorz, Jan 01)
             users, items, ratings = env.reset()
             env._affinity_change = temp
         else:
@@ -58,7 +54,10 @@ def run_simulation(
 
         online_users = env.online_users
         recommendations, _ = recommender.recommend(online_users, rpu)
+        # print(env._user_preferences[42])
         _, _, ratings, _ = env.step(recommendations)
+        # print(env._user_preferences[42])
+        # print()
         if isinstance(recommender, Autorec_W_Topics):
             ratings = {k: (v[0], v[1], env._item_topics[k[1]]) for k,v in ratings.items()}
             recommender.set_item_topics(env._item_topics)        

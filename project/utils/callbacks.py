@@ -17,8 +17,8 @@ def RMSE_func(env, recommender, **kwargs):
     return np.sqrt(np.mean((predicted_ratings - true_ratings) ** 2))
 
 
-def user_preferences_func(env, recommender, user_id: int = 0, **kwargs):
-    return env._user_preferences[user_id]
+def USER_PREF_func(env, recommender, user_id: int = 0, **kwargs):
+    return env._user_preferences[user_id].tolist()
 
 
 def REC_LAST_STEP_LOSSES_func(env, recommender, **kwargs):

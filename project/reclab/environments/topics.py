@@ -133,8 +133,16 @@ class Topics(environment.DictEnvironment):
         self._user_bias_type = user_bias_type
         self._item_bias_type = item_bias_type
 
-        if user_model not in ("dynamic", "dynamic-reverse", "incoherent", "confused"):
+        if user_model not in (
+            "dynamic",                      "dynamic-reverse",
+            "dynamic-rec-agnostic",         "dynamic-reverse-rec-agnostic",
+            "dynamic-rec-agnostic-rand",    "dynamic-reverse-rec-agnostic-rand"
+        ):
             raise ValueError(f"Invalid user_model (={user_model})")
+        if user_model in (
+            "dynamic-rec-agnostic",         "dynamic-reverse-rec-agnostic"
+        ):
+            self._dyna_rec_agnostic_topic = np.random.randint(low=0, high=num_topics, size=(num_users,), dtype=int, )
         self._user_model = user_model
 
     @property
@@ -186,6 +194,18 @@ class Topics(environment.DictEnvironment):
         rating = self._get_rating(user_id, item_id)
         topic = self._item_topics[item_id]
 
+        if self._user_model in (
+            'dynamic-rec-agnostic',
+            'dynamic-reverse-rec-agnostic'
+        ):
+            topic = np.asarray([self._dyna_rec_agnostic_topic[user_id]])
+
+        if self._user_model in (
+            'dynamic-rec-agnostic-rand',
+            'dynamic-reverse-rec-agnostic-rand'
+        ):
+            topic = np.random.randint(low=0, high=self._num_topics, size=topic.shape)
+
         # Update satiation.
         recommended = np.zeros(self._num_topics)
         recommended[topic] = 1
@@ -194,35 +214,23 @@ class Topics(environment.DictEnvironment):
             + np.random.randn(self._num_topics) * self._satiation_noise
         )
 
-        # Update underlying preference.
         preference = self._user_preferences[user_id, topic]
 
-        if self._user_model == "dynamic":
+        if self._user_model in (
+            "dynamic",          "dynamic-rec-agnostic",         "dynamic-rec-agnostic-rand"
+        ):
             if preference <= 5:
                 self._user_preferences[user_id, topic] += self._topic_change
                 not_topic = np.arange(self._num_topics) != topic
                 self._user_preferences[user_id, not_topic] -= self._topic_change / (self._num_topics - 1)
 
-        if self._user_model == "dynamic-reverse":
+        if self._user_model in (
+            "dynamic-reverse",  "dynamic-reverse-rec-agnostic", "dynamic-reverse-rec-agnostic-rand"
+        ):
             if preference >= 0:
                 self._user_preferences[user_id, topic] -= self._topic_change
                 not_topic = np.arange(self._num_topics) != topic
                 self._user_preferences[user_id, not_topic] += self._topic_change / (self._num_topics - 1)
-
-        if self._user_model == "incoherent":
-            if not 0 <= preference <= 5:
-                sign = np.random.choice([-1.0, 1.0])
-                self._user_preferences[user_id, topic] += sign * self._topic_change
-                not_topic = np.arange(self._num_topics) != topic
-                self._user_preferences[user_id, not_topic] -= sign * self._topic_change / (self._num_topics - 1)
-
-        if self._user_model == "confused":
-            if not 0 <= preference <= 5:
-                topic_change_min_1 = max(self._topic_change, 1)  # to avoid bad sampling when 'self._topic_change=0'
-                topic_change = np.random.randint(-topic_change_min_1, topic_change_min_1, size=(1,))
-                self._user_preferences[user_id, topic] += topic_change
-                not_topic = np.arange(self._num_topics) != topic
-                self._user_preferences[user_id, not_topic] -= topic_change / (self._num_topics - 1)
 
         return rating
 

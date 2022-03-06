@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 if __name__ == "__main__":
 
-    with open(Path("~/Desktop/res.pkl").expanduser(), "rb") as f:
+    with open(Path("res.pkl").expanduser(), "rb") as f:
         user_preferences = pkl.load(f)["user_preferences"]
 
     topic_changes = sorted(list(user_preferences.keys()))
@@ -19,7 +19,7 @@ if __name__ == "__main__":
         fig = plt.figure()
         ax = fig.add_subplot(projection="3d")
         zs = np.stack(user_preferences[tc]["mean"], axis=0)
-        ax.scatter(xs, ys, zs, cmap="turbo", s=40, c=zs, marker='o', alpha=1)
+        ax.scatter(xs, ys, zs, cmap="jet", s=40, c=zs, marker='o', alpha=1)
         ax.set_xlabel('topics')
         ax.set_ylabel('timesteps')
         ax.set_zlabel('preferences')

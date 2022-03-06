@@ -18,13 +18,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--recommender", type=str, default="autorec", choices=RECOMMENDERS.keys())
     parser.add_argument("--temporal-window-size", type=int, default=1)
     parser.add_argument("--num-users", type=int, default=100)
-    parser.add_argument("--num-items", type=int, default=50)
+    parser.add_argument("--num-items", type=int, default=100)
     parser.add_argument("--num-topics", type=int, default=10)
-    parser.add_argument("--rating-freq", type=float, default=1.0)
+    parser.add_argument("--rating-freq", type=float, default=0.1)
     parser.add_argument("--res-dir", type=str)
-    parser.add_argument("--env-type", type=str, choices=('dynamic', 'dynamic-reverse'), default='dynamic')
+    parser.add_argument("--env-type", 
+        type=str,
+        choices=(
+            'dynamic',                      'dynamic-reverse',
+            'dynamic-rec-agnostic',         'dynamic-reverse-rec-agnostic',
+            'dynamic-rec-agnostic-rand',    'dynamic-reverse-rec-agnostic-rand'
+        ),
+        default='dynamic'
+    )
     parser.add_argument("--exp-repeats", type=int, default=1)
-    parser.add_argument("--env-topic-change", type=str, default='1')
+    parser.add_argument("--env-topic-change", type=str, default='0,1')
+    parser.add_argument("--env-num-init-ratings", type=int, default=1000)
     parser.add_argument("--rec-eps-greedy", type=float, default=0.0)
     parser.add_argument("--recommender-mode", type=str, default='continuous')
     parser.add_argument("--rats-init-mode", type=str, default='zeros')
@@ -56,7 +65,7 @@ if __name__ == "__main__":
         "num_users": opts.num_users,
         "num_items": opts.num_items,
         "rating_frequency": opts.rating_freq,
-        "num_init_ratings": opts.num_users * opts.num_items // 5,
+        "num_init_ratings": opts.env_num_init_ratings,
         "noise": 0.0,
         "user_model": opts.env_type,
     }
@@ -84,9 +93,9 @@ if __name__ == "__main__":
         recommender.update_strategy(opts.rec_eps_greedy)
 
     callbacks_kwargs = dict(user_id=42, steps=opts.steps)
-    callbacks = [user_preferences_func]  #[RMSE_func, ARRI_func, REC_LAST_STEP_LOSSES_func]
+    callbacks = [RMSE_func, ARRI_func, REC_LAST_STEP_LOSSES_func, USER_PREF_func]
     post_proc_callbacks_kwargs = dict()
-    post_proc_callbacks = []  #[eval_post_proc(c) for c in callbacks]
+    post_proc_callbacks = [eval_post_proc(c) for c in callbacks]
 
     repeats = opts.exp_repeats
     topic_changes = opts.env_topic_change
@@ -105,22 +114,26 @@ if __name__ == "__main__":
         topic_change=topic_changes,
     )
 
-    with open(Path("~/Desktop/res.pkl").expanduser(), "wb") as f:
+    with open(Path("res.pkl").expanduser(), "wb") as f:
         pkl.dump(res, f)
 
     for k, v in res.items():
         means = [vv['mean'] for vv in v.values()]
         stds = [vv['std'] for vv in v.values()]
-        plot_graphs(
-            *means,
-            error_bars=stds,
-            title=k,
-            legend=True,
-            labels=[f"topic_change={x}" for x in topic_changes],
-            save=os.path.join(opts.res_dir, k),
-        )
+        try:
+            plot_graphs(
+                *means,
+                error_bars=stds,
+                title=k,
+                legend=True,
+                labels=[f"topic_change={x}" for x in topic_changes],
+                save=os.path.join(opts.res_dir, k),
+            )
+        except Exception as e:
+            logger.warning(f'{e} - skipping plot {k}')
 
     with open(os.path.join(opts.res_dir, "results.pkl"), mode="wb") as f:
+        logger.info(f'dumping pickle: {os.path.join(opts.res_dir, "results.pkl")}')
         pkl.dump(res, f)
 
     dump_opts_to_json(opts, os.path.join(opts.res_dir, "opts.json"))

@@ -1,6 +1,7 @@
 import io
 import matplotlib.pyplot as plt
 import numpy as np
+from loguru import logger
 
 from typing import List, Union
 
@@ -8,6 +9,7 @@ from typing import List, Union
 def plot_graphs(
     *lists, error_bars: List[List[float]] = None, title: str, legend: bool = False, labels: List[str] = None, show: bool = True, save: str = None
 ):
+    logger.info(f'plotting {title}')
     _, ax = plt.subplots()
     for i, l in enumerate(lists):
         if error_bars is None:

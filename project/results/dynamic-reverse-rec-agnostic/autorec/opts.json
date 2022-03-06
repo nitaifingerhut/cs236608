@@ -7,8 +7,8 @@
     "num_items": 100,
     "num_topics": 10,
     "rating_freq": 0.1,
-    "res_dir": "/home/manorz/cs236608/project/results/dynamic-reverse/autorec",
-    "env_type": "dynamic-reverse",
+    "res_dir": "/home/manorz/cs236608/project/results/dynamic-reverse-rec-agnostic/autorec",
+    "env_type": "dynamic-reverse-rec-agnostic",
     "exp_repeats": 10,
     "env_topic_change": [
         0.0,
