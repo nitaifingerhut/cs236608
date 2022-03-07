@@ -11,5 +11,5 @@ RECOMMENDERS = dict(
     libfm=LibFM_MLHB,
     knn=KNNRecommender,
     temporal_autorec=TemporalAutorec,
-    temporal_autorec2=TemporalAutorec2
+    temporal_autorec2=TemporalAutorec2,
 )

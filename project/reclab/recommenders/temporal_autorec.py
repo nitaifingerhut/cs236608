@@ -24,9 +24,9 @@ class TemporalAutoRecLib(AutoRecLib):
 
     def loss(self, pred, test, mask, lambda_value=1):
         autorec_loss = super().loss(pred, test, mask, lambda_value)
-        #reg_value_time_enc = torch.mul(lambda_value / 2, list(self.W.parameters())[0].norm(p="fro") ** 2)
+        # reg_value_time_enc = torch.mul(lambda_value / 2, list(self.W.parameters())[0].norm(p="fro") ** 2)
         # reg_value_time_enc = torch.mul(lambda_value / 2, self.W.norm(p="fro") ** 2)
-        total_loss = autorec_loss #+ reg_value_time_enc
+        total_loss = autorec_loss  # + reg_value_time_enc
         return total_loss
 
     def prepare_model(self):

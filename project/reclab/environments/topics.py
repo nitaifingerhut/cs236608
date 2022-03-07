@@ -134,15 +134,16 @@ class Topics(environment.DictEnvironment):
         self._item_bias_type = item_bias_type
 
         if user_model not in (
-            "dynamic",                      "dynamic-reverse",
-            "dynamic-rec-agnostic",         "dynamic-reverse-rec-agnostic",
-            "dynamic-rec-agnostic-rand",    "dynamic-reverse-rec-agnostic-rand"
+            "dynamic",
+            "dynamic-reverse",
+            "dynamic-rec-agnostic",
+            "dynamic-reverse-rec-agnostic",
+            "dynamic-rec-agnostic-rand",
+            "dynamic-reverse-rec-agnostic-rand",
         ):
             raise ValueError(f"Invalid user_model (={user_model})")
-        if user_model in (
-            "dynamic-rec-agnostic",         "dynamic-reverse-rec-agnostic"
-        ):
-            self._dyna_rec_agnostic_topic = np.random.randint(low=0, high=num_topics, size=(num_users,), dtype=int, )
+        if user_model in ("dynamic-rec-agnostic", "dynamic-reverse-rec-agnostic"):
+            self._dyna_rec_agnostic_topic = np.random.randint(low=0, high=num_topics, size=(num_users,), dtype=int,)
         self._user_model = user_model
 
     @property
@@ -194,16 +195,10 @@ class Topics(environment.DictEnvironment):
         rating = self._get_rating(user_id, item_id)
         topic = self._item_topics[item_id]
 
-        if self._user_model in (
-            'dynamic-rec-agnostic',
-            'dynamic-reverse-rec-agnostic'
-        ):
+        if self._user_model in ("dynamic-rec-agnostic", "dynamic-reverse-rec-agnostic"):
             topic = np.asarray([self._dyna_rec_agnostic_topic[user_id]])
 
-        if self._user_model in (
-            'dynamic-rec-agnostic-rand',
-            'dynamic-reverse-rec-agnostic-rand'
-        ):
+        if self._user_model in ("dynamic-rec-agnostic-rand", "dynamic-reverse-rec-agnostic-rand"):
             topic = np.random.randint(low=0, high=self._num_topics, size=topic.shape)
 
         # Update satiation.
@@ -216,17 +211,13 @@ class Topics(environment.DictEnvironment):
 
         preference = self._user_preferences[user_id, topic]
 
-        if self._user_model in (
-            "dynamic",          "dynamic-rec-agnostic",         "dynamic-rec-agnostic-rand"
-        ):
+        if self._user_model in ("dynamic", "dynamic-rec-agnostic", "dynamic-rec-agnostic-rand"):
             if preference <= 5:
                 self._user_preferences[user_id, topic] += self._topic_change
                 not_topic = np.arange(self._num_topics) != topic
                 self._user_preferences[user_id, not_topic] -= self._topic_change / (self._num_topics - 1)
 
-        if self._user_model in (
-            "dynamic-reverse",  "dynamic-reverse-rec-agnostic", "dynamic-reverse-rec-agnostic-rand"
-        ):
+        if self._user_model in ("dynamic-reverse", "dynamic-reverse-rec-agnostic", "dynamic-reverse-rec-agnostic-rand"):
             if preference >= 0:
                 self._user_preferences[user_id, topic] -= self._topic_change
                 not_topic = np.arange(self._num_topics) != topic

@@ -50,5 +50,5 @@ def stdout_redirector():
 def dump_opts_to_json(opts: Namespace, path: str):
     params = vars(opts)
     with open(path, "w") as f:
-        logger.info(f'dumping json opts: {path}')
+        logger.info(f"dumping json opts: {path}")
         json.dump(params, f, indent=4)

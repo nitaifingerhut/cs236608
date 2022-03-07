@@ -22,7 +22,7 @@ def USER_PREF_func(env, recommender, user_id: int = 0, **kwargs):
 
 
 def REC_LAST_STEP_LOSSES_func(env, recommender, **kwargs):
-    if env._timestep == kwargs['steps'] - 1:
+    if env._timestep == kwargs["steps"] - 1:
         return recommender.losses
     else:
         return None
@@ -39,7 +39,7 @@ def DO_NOTHING_post_proc(L, **kwargs):
 
 def eval_post_proc(c):
     try:
-        return eval(re.findall("^(.*)_func$", c.__name__)[0] + '_post_proc')
+        return eval(re.findall("^(.*)_func$", c.__name__)[0] + "_post_proc")
     except NameError as ne:
         logger.info(ne)
         return DO_NOTHING_post_proc

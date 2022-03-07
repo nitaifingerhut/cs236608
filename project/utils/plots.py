@@ -7,15 +7,23 @@ from typing import List, Union
 
 
 def plot_graphs(
-    *lists, error_bars: List[List[float]] = None, title: str, legend: bool = False, labels: List[str] = None, show: bool = True, save: str = None
+    *lists,
+    error_bars: List[List[float]] = None,
+    title: str,
+    legend: bool = False,
+    labels: List[str] = None,
+    show: bool = True,
+    save: str = None,
 ):
-    logger.info(f'plotting {title}')
+    logger.info(f"plotting {title}")
     _, ax = plt.subplots()
     for i, l in enumerate(lists):
         if error_bars is None:
             ax.plot(np.arange(len(l)), l, ".-", label=f"{i + 1}" if labels is None else labels[i])
         else:
-            ax.errorbar(np.arange(len(l)), l, yerr=error_bars[i], fmt=".-", label=f"{i + 1}" if labels is None else labels[i])
+            ax.errorbar(
+                np.arange(len(l)), l, yerr=error_bars[i], fmt=".-", label=f"{i + 1}" if labels is None else labels[i]
+            )
 
     ax.set_xlabel(r"$timestep$")
     ax.set_title(title)

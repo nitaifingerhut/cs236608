@@ -38,7 +38,7 @@ def run_simulation(
             # items, users, ratings = env.reset()
             users, items, ratings = env.reset()
         if isinstance(recommender, Autorec_W_Topics):
-            ratings = {k: (v[0], v[1], env._item_topics[k[1]]) for k,v in ratings.items()}
+            ratings = {k: (v[0], v[1], env._item_topics[k[1]]) for k, v in ratings.items()}
             recommender.set_item_topics(env._item_topics)
         recommender.reset(users, items, ratings)
 
@@ -59,8 +59,8 @@ def run_simulation(
         # print(env._user_preferences[42])
         # print()
         if isinstance(recommender, Autorec_W_Topics):
-            ratings = {k: (v[0], v[1], env._item_topics[k[1]]) for k,v in ratings.items()}
-            recommender.set_item_topics(env._item_topics)        
+            ratings = {k: (v[0], v[1], env._item_topics[k[1]]) for k, v in ratings.items()}
+            recommender.set_item_topics(env._item_topics)
         recommender.update(ratings=ratings)
 
         if retrain and hasattr(recommender, "_model") and isinstance(recommender, LibFM_MLHB):
@@ -119,8 +119,8 @@ def run_experiment(
             for i, n in enumerate(callbacks_names):
                 # callbacks_res[n][vv] = list(np.mean(np.asarray(callbacks_res[n][vv]), axis=0))
                 callbacks_res[n][vv] = {
-                    'mean'  :   list(np.mean(np.asarray(callbacks_res[n][vv]), axis=0)),
-                    'std'   :   list(np.std(np.asarray(callbacks_res[n][vv]), axis=0)),
+                    "mean": list(np.mean(np.asarray(callbacks_res[n][vv]), axis=0)),
+                    "std": list(np.std(np.asarray(callbacks_res[n][vv]), axis=0)),
                 }
 
     return callbacks_res

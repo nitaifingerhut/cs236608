@@ -24,7 +24,7 @@ class AutoRecLib(torch.nn.Module):
         mse = (((pred - test) * mask) ** 2).mean()
         # reg_value_enc = torch.mul(lambda_value / 2, list(self.encoder.parameters())[0].norm(p="fro") ** 2)
         # reg_value_dec = torch.mul(lambda_value / 2, list(self.decoder.parameters())[0].norm(p="fro") ** 2)
-        return mse # torch.add(mse, torch.add(reg_value_enc, reg_value_dec))
+        return mse  # torch.add(mse, torch.add(reg_value_enc, reg_value_dec))
 
     def prepare_model(self):
         self.encoder = torch.nn.Linear(self.num_users, self.hidden_neuron, bias=True)
@@ -194,7 +194,9 @@ class Autorec(recommender.ForeverPredictRecommender):
     def update(self, users=None, items=None, ratings=None):  # noqa: D102
         super().update(users, items, ratings)
         self.model.prepare_model()
-        self.model = self.model.train()  # TODO: check if necessary since AutoRec calls this in his train_model method. (manorz, 02/16/22)
+        self.model = (
+            self.model.train()
+        )  # TODO: check if necessary since AutoRec calls this in his train_model method. (manorz, 02/16/22)
         for user_item in ratings:
             self.model.seen_users.add(user_item[0])
             self.model.seen_items.add(user_item[1])
