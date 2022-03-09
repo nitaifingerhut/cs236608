@@ -9,7 +9,7 @@
     "rating_freq": 0.1,
     "res_dir": "/home/nitai/cs236608/project/results/env_dra_eg_0_25",
     "env_type": "dynamic-rec-agnostic",
-    "exp_repeats": 1,
+    "exp_repeats": 10,
     "env_topic_change": [
         0.0,
         1.0
