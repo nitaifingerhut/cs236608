@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num-items", type=int, default=100)
     parser.add_argument("--num-topics", type=int, default=10)
     parser.add_argument("--rating-freq", type=float, default=0.1)
-    parser.add_argument("--res-dir", type=str)
+    parser.add_argument("--res-dir", type=str, default='default-test2')
     parser.add_argument(
         "--env-type",
         type=str,
@@ -34,7 +34,7 @@ def parse_args() -> argparse.Namespace:
             "dynamic-rec-agnostic-rand",
             "dynamic-reverse-rec-agnostic-rand",
         ),
-        default="dynamic",
+        default="dynamic-reverse",
     )
     parser.add_argument("--exp-repeats", type=int, default=1)
     parser.add_argument("--env-topic-change", type=str, default="0,1")

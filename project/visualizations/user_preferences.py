@@ -10,7 +10,7 @@ from mpl_toolkits.mplot3d import Axes3D
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--res-dir", type=str, required=True)
+    parser.add_argument("--res-dir", type=str, default='default-test')
     opts = parser.parse_args()
 
     res_path = Path(__file__).parent.parent.joinpath(f"results/{opts.res_dir}/results.pkl").expanduser()
@@ -39,4 +39,6 @@ if __name__ == "__main__":
         ax.set_title(f"topic change = {tc}")
 
     plt.tight_layout()
+    plt.savefig(Path(__file__).parent.parent.joinpath(f"results/{opts.res_dir}/viz.png").expanduser())
     plt.show()
+    
