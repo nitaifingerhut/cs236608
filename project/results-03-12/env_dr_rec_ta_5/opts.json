@@ -1,0 +1,22 @@
+{
+    "seed": 42,
+    "steps": 100,
+    "recommender": "temporal_autorec",
+    "temporal_window_size": 5,
+    "num_users": 100,
+    "num_items": 100,
+    "num_topics": 10,
+    "rating_freq": 0.1,
+    "res_dir": "/home/nitai/cs236608/project/results/env_dr_rec_ta_5",
+    "env_type": "dynamic-reverse",
+    "exp_repeats": 10,
+    "env_topic_change": [
+        0.0,
+        1.0
+    ],
+    "env_num_init_ratings": 1000,
+    "rec_eps_greedy": 0.0,
+    "recommender_mode": "continuous",
+    "rats_init_mode": "zeros",
+    "recs_init_mode": "zeros"
+}
