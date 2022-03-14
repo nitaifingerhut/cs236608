@@ -49,9 +49,9 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     opts = parse_args()
     try:
-        opts.res_dir = os.path.join("results", opts.res_dir)
+        opts.res_dir = os.path.join("results-03-15", opts.res_dir)
     except TypeError as _:
-        opts.res_dir = os.path.join("results", opts.env_type, opts.recommender)
+        opts.res_dir = os.path.join("results-03-15", opts.env_type, opts.recommender)
         if opts.rec_eps_greedy:
             opts.res_dir = os.path.join(opts.res_dir, f"eps_greedy={opts.rec_eps_greedy}")
     opts.res_dir = os.path.abspath(opts.res_dir)
